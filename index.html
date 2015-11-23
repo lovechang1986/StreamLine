@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html lang="cn">
+<head>
+    <title>index.html</title>
+
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+
+    <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+    <script data-main="js/app" src="js/lib/require.min.js"></script>
+    <script id="square-fs" type="x-shader/x-fragment">
+        precision mediump float;
+
+        void main(void) {
+            gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+        }
+    </script>
+    <script id="square-vs" type="x-shader/x-vertex">
+        attribute vec3 aVertexPosition;
+
+        uniform mat4 uMVMatrix;
+        uniform mat4 uPMatrix;
+
+        void main(void) {
+            gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        }
+    </script>
+    <script id="squaretexture-fs" type="x-shader/x-fragment">
+        precision mediump float;
+        uniform sampler2D uSampler;
+        varying vec2 vTextureCoord;
+        void main(void) {
+           // gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+           gl_FragColor = texture2D(uSampler,vTextureCoord);
+        }
+    </script>
+    <script id="squaretexture-vs" type="x-shader/x-vertex">
+        attribute vec3 aVertexPosition;
+        attribute vec2 aTextureCoord;
+        varying vec2 vTextureCoord;
+        uniform mat4 uMVMatrix;
+        uniform mat4 uPMatrix;
+
+        void main(void) {
+            //gl_Position = vec4(aVertexPosition, 1.0);
+            gl_Position = vec4(aVertexPosition, 1.0);
+            vTextureCoord = aTextureCoord;
+        }
+    </script>
+    <script id="noise-fs" type="x-shader/x-fragment">
+        precision mediump float;
+
+        float randomNoise(vec2 p){
+            float pi = 3.14;
+            float f = 16.;
+            return fract(6791.*sin(p.x*47.+p.y*9973.));
+        }
+        void main(void) {
+            vec2 resolution = vec2(500.,500.);
+            float wave = randomNoise(gl_FragCoord.xy/resolution);
+            if(wave > 0.96){
+                gl_FragColor = vec4(vec3(1.0), 1.0);
+            }else{
+                gl_FragColor = vec4(vec3(0.0), 1.0);
+            }
+        }
+    </script>
+    <script id="noise-vs" type="x-shader/x-vertex">
+        attribute vec3 aVertexPosition;
+
+        uniform mat4 uMVMatrix;
+        uniform mat4 uPMatrix;
+
+        void main(void) {
+            gl_Position = vec4(aVertexPosition, 1.0);
+        }
+    </script>
+
+</head>
+
+<body>
+<canvas id="streamline" width="512" height="512"></canvas>
+<h1 id="hello">Javascript 未执行</h1>
+</body>
+</html>
