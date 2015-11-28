@@ -9,7 +9,7 @@ define(['app/ShaderProgram','app/Noise'], function(ShaderProgram,Noise){
         gl.bindTexture(gl.TEXTURE_2D, framebuffer.texture);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.generateMipmap(gl.TEXTURE_2D);
+        //gl.generateMipmap(gl.TEXTURE_2D);
 
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, framebuffer.width, framebuffer.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
         framebuffer.renderbuffer = gl.createRenderbuffer();
