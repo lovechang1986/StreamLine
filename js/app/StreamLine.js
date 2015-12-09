@@ -58,7 +58,7 @@ define(["app/ShaderProgram","app/NoiseFrame","app/Vector","lib/glMatrix-0.9.5.mi
     function createDataTexture(gl,array,width,height){
         var texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D,texture);
-        //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -91,7 +91,7 @@ define(["app/ShaderProgram","app/NoiseFrame","app/Vector","lib/glMatrix-0.9.5.mi
         var width = Vector.width;
         var height = Vector.height;
         var indices = createIndices(width,height);
-        indices = [620];
+        //indices = [620];
         buffers.number = createBuffer(gl,numbers,1);
         buffers.index = createElementBuffer(gl,indices);
         return buffers;
@@ -100,7 +100,7 @@ define(["app/ShaderProgram","app/NoiseFrame","app/Vector","lib/glMatrix-0.9.5.mi
         var indices = [];
         for(var i=0;i<height-1;i++){
             for(var j=0;j<width-1;j++){
-                var first = i * width;
+                var first = i * width + j;
                 var second = first + width;
                 indices.push(second);
                 indices.push(first);

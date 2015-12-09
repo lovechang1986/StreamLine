@@ -1,5 +1,10 @@
 ﻿<!DOCTYPE html>
 <html lang="cn">
+<body>
+<canvas id="streamline" width="32" height="32"></canvas>
+<h1 id="hello">Javascript 未执行</h1>
+</body>
+
 <head>
     <title>index.html</title>
 
@@ -26,17 +31,60 @@
             gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
         }
     </script>
+    <script id="streamline1-fs" type="x-shader/x-fragment">
+        precision mediump float;
+        uniform sampler2D uData;
+        uniform sampler2D uSampler;
+        varying vec2 vVertexCoord;
+        void main(void) {
+            gl_FragColor = texture2D(uData,vVertexCoord);
+        }
+    </script>
+    <script id="streamline1-vs" type="x-shader/x-vertex">
+        attribute vec2 aVertexPosition;
+        attribute vec2 aVertexCoord;
+        varying vec2 vVertexCoord;
+        void main(void) {
+            vVertexCoord = aVertexCoord;
+            gl_Position = vec4(aVertexPosition,0.0,1.0);
+        }
+
+    </script>
+    <script id="streamline2-fs" type="x-shader/x-fragment">
+        precision mediump float;
+        uniform sampler2D uData;
+        uniform sampler2D uSampler;
+        varying vec2 vTextureCoord;
+        void main(void){
+            gl_FragColor = texture2D(uSampler,vTextureCoord);
+        }
+    </script>
+    <script id="streamline2-vs" type="x-shader/x-vertex">
+        attribute vec2 aVertexPosition;
+        attribute vec2 aVertexCoord;
+        varying vec2 vVertexCoord;
+        void main(void){
+            gl_Position = vec4(aVertexPosition,0.0,1.0);
+            vVertexCoord = aVertexCoord;
+        }
+
+    </script>
+
+
     <script id="streamline-fs" type="x-shader/x-fragment">
         precision mediump float;
         uniform sampler2D uSampler;
         uniform sampler2D uData;
         varying vec2 vTextureCoord;
+        varying vec4 vColor;
         void main(void) {
             gl_FragColor = texture2D(uSampler,vTextureCoord);
             gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+           // gl_FragColor = vColor;
         }
     </script>
     <script id="streamline-vs" type="x-shader/x-vertex">
+
 
         attribute float aVertexNumber;
    uniform float uWidth;
@@ -83,6 +131,7 @@
     }
     //根据坐标值读取噪声坐标中的噪声颜色
     vec4 colorFromIj(vec2 ij){
+
         vec2 coord;
         float noiseWidth,noiseHeight;
         noiseWidth = 128.0;
@@ -94,7 +143,8 @@
    //耦合成分：uniform值：uWidth，uHeight，uSampler，uData
    vec4 licColor(vec2 ij){
        vec4 color = vec4(0.0);//用于存储最后的结果
-       float colorNum = 0.0; //实际卷积长度，碰到边界或者极值会导致卷积提前终止
+       float colorNum = 0.0;//实际卷积长度，碰到边界或者极值会导致卷积提前终止
+
        const int kernelLen = 5;//卷积核长度
        vec4 data;
        data = dataFromIj(ij);
@@ -112,7 +162,7 @@
           if(pIj.x < 0.0 || pIj.y < 0.0) break;
           if(pIj.x > uWidth - 1.0 || pIj.y > uHeight -1.0) break;//超出边界时跳出
           pData = dataFromIj(pIj);
-          color += dataFromIj(pIj);
+          color += colorFromIj(pIj);
           colorNum += 1.0;
        }
        //反向卷积
@@ -121,7 +171,7 @@
           if(nIj.x < 0.0 || nIj.y < 0.0) break;
           if(nIj.x > uWidth - 1.0 || nIj.y > uHeight -1.0) break;//超出边界时跳出
           nData = dataFromIj(nIj);
-          color += dataFromIj(nIj);
+          color += colorFromIj(nIj);
           colorNum += 1.0;
        }
        color = color/colorNum;
@@ -135,17 +185,15 @@
    void main(void) {
        vec2 ij;
        ij.y = floor(aVertexNumber / uWidth);
-       ij.x = aVertexNumber-ij.x*uWidth;
+       ij.x = aVertexNumber-ij.y*uWidth;
        vColor = licColor(ij);
        vec4 data;
        data = dataFromIj(ij);//数据纹理的x，y存储方向值，z，w存储位置值
        //vec2 position = data.zw;
-       vec2 position = data.zw/31.0*2.0-1.0;
+       vec2 position = data.zw/30.0*2.0-1.0;
        gl_Position = vec4(position,0.0,1.0);
-       gl_PointSize = 10.0;
+       gl_PointSize = 1.0;
    }
-
-
     </script>
     <script id="squaretexture-fs" type="x-shader/x-fragment">
         precision mediump float;
@@ -199,9 +247,4 @@
     </script>
 
 </head>
-
-<body>
-<canvas id="streamline" width="128" height="128"></canvas>
-<h1 id="hello">Javascript 未执行</h1>
-</body>
 </html>

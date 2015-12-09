@@ -4,7 +4,7 @@
     },
     shim : {}
 });
-var jsArray = ['app/WebglContext','app/StreamLine', 'lib/jquery' ];
+var jsArray = ['app/WebglContext','app/StreamLineSimple', 'lib/jquery' ];
 require(jsArray, function(WebglContext,Noise) {
     "use strict";
     var context = new WebglContext("streamline");
