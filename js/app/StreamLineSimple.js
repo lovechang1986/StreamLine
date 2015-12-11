@@ -4,8 +4,8 @@
 define(["app/ShaderProgram","app/NoiseFrame","app/Vector","lib/glMatrix-0.9.5.min"],function(ShaderProgram,NoiseFrame,Vector){
     var StreamLineSimple = function(gl){
         console.log(Vector);
-        var width = 31;
-        var height = 31;
+        var width = 400;
+        var height = 400;
         Vector.width = width;
         Vector.height = height;
         var shaderProgram = new ShaderProgram(gl,"streamline1");
@@ -15,7 +15,32 @@ define(["app/ShaderProgram","app/NoiseFrame","app/Vector","lib/glMatrix-0.9.5.mi
         //var texture = new ImageTexture(gl,"sources/crate.gif");
         var noiseFrame = new NoiseFrame(gl);
         var texture = noiseFrame.texture;
-        var dataTexture = createDataTexture(gl,Vector,31,31);
+        var vector = syntheseVector(width,height,0);
+        var dataTexture = createDataTexture(gl,vector,width,height);
+        function syntheseVector(width,height,mode){
+            var vector = new Array(width*height*4);
+            var vec_x = 0,vec_y = 0,vcMag = 0,scale = 0;
+            var index = 0;canvas
+            for(var i=0;i<height;i++){
+                for(var j=0;j<width;j++){
+                    index = i * width + j;
+                    vec_x = -i/height + 0.5;
+                    vec_y = j/width - 0.5;
+
+                    vcMag = Math.sqrt(vec_x*vec_x + vec_y*vec_y);
+                    scale = (vcMag < 0.001)?0:1/vcMag;
+                    vec_x *= scale;
+                    vec_y *= scale;
+
+
+                    vector[index*4] = vec_x;
+                    vector[index*4+1] = vec_y;
+                    vector[index*4+2] = j;
+                    vector[index*4+3] = i;
+                }
+            }
+            return vector;
+        }
         bindingLocation(gl,shaderProgram);
         this.bindBuffers = function(){
             gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
@@ -120,6 +145,8 @@ define(["app/ShaderProgram","app/NoiseFrame","app/Vector","lib/glMatrix-0.9.5.mi
     }
     function createUniforms(gl){
         var uniforms = {};
+        uniforms.width = gl.canvas.width;
+        uniforms.height = gl.canvas.height;
         //uniforms.width = Vector.width;
         //uniforms.height = Vector.height;
         return uniforms;
