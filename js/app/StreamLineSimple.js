@@ -20,7 +20,7 @@ define(["app/ShaderProgram","app/NoiseFrame","app/Vector","lib/glMatrix-0.9.5.mi
         function syntheseVector(width,height,mode){
             var vector = new Array(width*height*4);
             var vec_x = 0,vec_y = 0,vcMag = 0,scale = 0;
-            var index = 0;canvas
+            var index = 0;
             for(var i=0;i<height;i++){
                 for(var j=0;j<width;j++){
                     index = i * width + j;
