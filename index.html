@@ -48,6 +48,45 @@
         }
 
     </script>
+    <script id="streamline1-test-fs" type="x-shader/x-fragment">
+
+        precision mediump float;
+        uniform sampler2D uData;
+        uniform sampler2D uSampler;
+        varying vec2 vVertexCoord;
+        vec4 licColor(vec2 ij){
+            vec2 ij0,ij1;
+            vec4 color = vec4(0.0);
+            float curlen = 0.0;
+            float maxlen = 10.0;
+            float xishu = 63.0;
+            float totalWeight = 0.0;
+            //positive
+            for(int i=0;i<krnlen;i++){
+                data = dataFromIj(ij);
+                seglen = seglenFromVector(data.xy);
+                ij1 = ij0 + data.xy* seglen;
+                noise = noiseFromIj((ij0+ij1)/2.0);
+                weight = seglen*xishu;
+                totalWeight += weight;
+                color += weight * noise;
+
+            }
+
+            //negative
+            return color/totalWeight;
+        }
+
+
+        void main(void) {
+            vec4 data;
+            data = texture2D(uData,vVertexCoord);
+            vec2 ij;
+            ij = data.zw;
+            gl_FragColor = vec4(data.xy,0.0,1.0);
+        }
+
+    </script>
     <script id="streamline1-vs" type="x-shader/x-vertex">
         attribute vec2 aVertexPosition;
         attribute vec2 aVertexCoord;
