@@ -32,91 +32,61 @@
         }
     </script>
     <script id="streamline1-fs" type="x-shader/x-fragment">
-
         precision mediump float;
         uniform sampler2D uData;
         uniform sampler2D uSampler;
         uniform float uWidth;
         uniform float uHeight;
         varying vec2 vVertexCoord;
-       float seglenFromVector(vec2 vector,vec2 ij0){
-            float seglen = 1000.0;
-            const float VECTOR_COMPONENT_MIN = 0.05;
-            float tmplen = 0.0;
-            seglen = (vector.x < -VECTOR_COMPONENT_MIN)?(floor(ij0.x)-ij0.x)/vector.x:seglen;
-            seglen = (vector.x > VECTOR_COMPONENT_MIN)?(floor(floor(ij0.x) + 1.5)-ij0.x)/vector.x:seglen;
-            seglen = (vector.y < -VECTOR_COMPONENT_MIN)?
-                      ( ( (tmplen = (floor(ij0.y)-ij0.y)/vector.y)<seglen)?tmplen:seglen)
-                      :seglen;
-            seglen = (vector.y > VECTOR_COMPONENT_MIN)?
-                       (((tmplen = (floor(floor(ij0.y)+1.5)-ij0.y)/vector.y)<seglen)?tmplen:seglen)
-                       :seglen;
-            return seglen;
+        vec4 readFromTexture(vec2 ij,sampler2D texture){
+           return texture2D(texture,vec2(ij.x/uWidth,ij.y/uHeight));
         }
-       vec4 dataFromIj(vec2 ij){
-            vec4 data;
-            data = texture2D(uData,vec2(ij.x/uWidth,ij.y/uHeight));
-            return data;
-        }
-       vec4 noiseFromIj(vec2 ij){
-           vec4 noise;
-           noise = texture2D(uSampler,vec2(ij.x/uWidth,ij.y/uHeight));
-           return noise;
-       }
-       vec4 licColor(vec2 ij){
-           const int krnlen = 5;
-            vec2 ij0,ij1;
-            ij0 = ij;
-            ij1 = ij;
-            vec4 color = vec4(0.0);
-            float curlen = 0.0;
-            float maxlen = 10.0;
-            float seglen = 0.0;
-            float xishu = 63.0;
-            float totalWeight = 0.0;
-            float advects = 0.0;
-            float ADVECTS = 15.0;
-            vec2 vector = vec2(0.0);
-            vec4 data;
-            vec4 noise;
-            float weight = 0.0;
-            //正向卷积
-            for(int i=0;i<krnlen;i++){
-                data = dataFromIj(ij0);
-                //判定是否为涡流中心，若是，则跳出
-                if(data.x == 0.0 && data.y == 0.0){
-                    if(advects == 0.0){
-                        color = vec4(0.0);
-                        totalWeight = 1.0;
+        vec4 licColor(vec2 ij){
+           const float krnlen = 15.0;
+            vec2 ij0=ij,ij1;
+            vec4 color = vec4(0.0),data,noise;
+            float seglen = 0.0,
+                     totalWeight = 0.0,
+                     advects = 0.0,
+                     weight = 0.0;
+            //卷积运算，i=0时正向，i=1时，反向。
+            for(int i = 0;i<2;i++){
+                for(float j=krnlen;j>0.0;j-=1.0){
+                    data = readFromTexture(ij0,uData);
+                    //判定是否为涡流中心，若是，则跳出
+                    if(data.x == 0.0 && data.y == 0.0){
+                        if(advects == 0.0){
+                            color = vec4(0.0);
+                            totalWeight = 1.0;
+                        }
+                        break;
                     }
-                    break;
+
+                    //计算本次增加流线片段的长度
+                    seglen = 1.0;
+
+                    //计算下一个点的位置
+                    if(i == 0){
+                        ij1 = ij0 + data.xy * seglen;
+                    }else{
+                        ij1 = ij0 - data.xy * seglen;
+                    }
+
+                    //判定是否超出边界
+                    if(ij1.x < 0.0 || ij1.y < 0.0 || ij1.x > uWidth || ij1.y > uHeight) break;
+                    //获取中间点的位置的噪声图像
+                    noise = readFromTexture((ij0+ij1)/2.0,uSampler);
+                    //计算当前流线段的权重值
+                    weight = j;
+
+                    //累计权重值
+                    totalWeight += weight;
+                    //累计颜色值
+                    color += weight * noise;
+                    //更新ij0，以便进行下一轮循环
+                    ij0 = ij1;
                 }
-
-                //计算本次增加流线片段的长度
-                seglen = 1.0;
-
-                //计算下一个点的位置
-                ij1 = ij0 + data.xy * seglen;
-                //判定是否超出边界
-                if(ij1.x < 0.0 || ij1.y < 0.0 || ij1.x > uWidth || ij1.y > uHeight) break;
-                //判断流线是否超长
-                if(curlen > 12.0) break;
-                //获取中间点的位置的噪声图像
-                noise = noiseFromIj((ij0+ij1)/2.0);
-                //计算当前流线段的权重值
-                weight = seglen*xishu;
-                //累计流线长度
-                curlen += seglen;
-                //累计权重值
-                totalWeight += weight;
-                //累计颜色值
-                color += weight * noise;
-                //更新ij0，以便下一轮循环
-                ij0 = ij1;
-
             }
-
-            //反向卷积
             return color/totalWeight;
         }
 
@@ -128,10 +98,7 @@
             ij = data.zw;
             ij = ij+vec2(0.5);
             gl_FragColor = licColor(ij);
-            gl_FragColor.w= 1.0;
-            //gl_FragColor = texture2D(uSampler,vVertexCoord);
         }
-
     </script>
     <script id="streamline1-vs" type="x-shader/x-vertex">
         attribute vec2 aVertexPosition;
