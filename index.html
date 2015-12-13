@@ -42,7 +42,7 @@
            return texture2D(texture,vec2(ij.x/uWidth,ij.y/uHeight));
         }
         vec4 licColor(vec2 ij){
-           const float krnlen = 15.0;
+           const float krnlen = 25.0;
             vec2 ij0=ij,ij1;
             vec4 color = vec4(0.0),data,noise;
             float seglen = 0.0,
@@ -166,7 +166,7 @@
                 result.x += 1.0;
             }else{
                 result.x -= 1.0;
-            }
+            }noise
         }else{
             if(direction.y > 0.0){
                 result.y += 1.0;
@@ -288,11 +288,13 @@
         void main(void) {
             vec2 resolution = vec2(500.,500.);
             float wave = randomNoise(gl_FragCoord.xy/resolution);
-            if(wave > 0.96){
-                gl_FragColor = vec4(vec3(1.0), 1.0);
+            float rate = 0.76;
+            if(wave > rate){
+                wave = 1.0/(1.0 - rate)*wave + 1.0 - 1.0/(1.0 - rate);
             }else{
-                gl_FragColor = vec4(vec3(0.0), 1.0);
+                wave = 0.0;
             }
+
             gl_FragColor = vec4(vec3(wave), 1.0);
         }
     </script>

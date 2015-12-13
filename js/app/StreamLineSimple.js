@@ -23,7 +23,11 @@ define(["app/ShaderProgram","app/NoiseFrame","app/Vector","lib/glMatrix-0.9.5.mi
             var index = 0;
             for(var i=0;i<height;i++){
                 for(var j=0;j<width;j++){
-                    index = i * width + j;
+                    if(mode == 0){
+                        index = i * width + j;//中心矢量场
+                    }else{
+                        index = (height -1-i)*width+j;//马鞍矢量场
+                    }
                     vec_x = -i/height + 0.5;
                     vec_y = j/width - 0.5;
 
