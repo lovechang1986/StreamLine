@@ -36,6 +36,8 @@
         precision mediump float;
         uniform sampler2D uData;
         uniform sampler2D uSampler;
+        uniform float uWidth;
+        uniform float uHeight;
         varying vec2 vVertexCoord;
 
 
@@ -53,12 +55,29 @@
         precision mediump float;
         uniform sampler2D uData;
         uniform sampler2D uSampler;
+        uniform float uHeight;
+        uniform float uWidth;
         varying vec2 vVertexCoord;
+        float seglenFromVector(vec2 vector,vec2 ij0){
+            float seglen = 1000.0;
+            float const VECTOR_COMPONENT_MIN = 0.05;
+            float tmplen = 0.0;
+            seglen = (vector.x < -VECTOR_COMPONENT_MIN)?(floor(ij0.x)-ij0.x)/vector.x:seglen;
+            seglen = (vector.x > VECTOR_COMPONENT_MIN)?(floor(floor(ij0.x) + 1.5)-ij0.x)/vector.x:seglen;
+            seglen = (vector.y < -VECTOR_COMPONENT_MIN)?
+                      ( ( (tmplen = (floor(ij0.y)-ij0.y)/vector.y)<seglen)?tmplen:seglen)
+                      :seglen;
+            seglen = (vector.y > VECTOR_COMPONENT_MIN)?
+                       (((tmplen = (floor(floor(ij0.y)+1.5)-ij0.y)/vector.y)<seglen)?tmplen:seglen)
+                       :seglen;
+            return seglen;
+        }
         vec4 licColor(vec2 ij){
             vec2 ij0,ij1;
             vec4 color = vec4(0.0);
             float curlen = 0.0;
             float maxlen = 10.0;
+            float seglen = 0.0;
             float xishu = 63.0;
             float totalWeight = 0.0;
             //positive
@@ -66,8 +85,12 @@
                 data = dataFromIj(ij);
                 seglen = seglenFromVector(data.xy);
                 ij1 = ij0 + data.xy* seglen;
+                //判定是否超出边界
+                if(ij1.x < 0.0 || ijl.y < 0.0 || ij1.x > uWidth || ij1.y > uHeight) break;
+                if(curlen > 12.0) break;
                 noise = noiseFromIj((ij0+ij1)/2.0);
                 weight = seglen*xishu;
+                curlen += seglen;
                 totalWeight += weight;
                 color += weight * noise;
 
