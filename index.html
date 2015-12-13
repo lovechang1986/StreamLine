@@ -77,7 +77,11 @@
                     //获取中间点的位置的噪声图像
                     noise = readFromTexture((ij0+ij1)/2.0,uSampler);
                     //计算当前流线段的权重值
-                    weight = j;
+                    if(i==0){
+                        weight = j*1115.0;
+                    }else{
+                        weight = j*0.5;
+                    }
 
                     //累计权重值
                     totalWeight += weight;
