@@ -4,8 +4,8 @@
 define(["app/ShaderProgram","app/NoiseFrame","app/Vector","lib/glMatrix-0.9.5.min"],function(ShaderProgram,NoiseFrame,Vector){
     var StreamLineSimple = function(gl){
         console.log(Vector);
-        var width = 400;
-        var height = 400;
+        var width = 512;
+        var height = 512;
         Vector.width = width;
         Vector.height = height;
         var shaderProgram = new ShaderProgram(gl,"streamline1");
@@ -104,8 +104,8 @@ define(["app/ShaderProgram","app/NoiseFrame","app/Vector","lib/glMatrix-0.9.5.mi
         shaderProgram.vertexCoordAttribute = gl.getAttribLocation(shaderProgram,"aVertexCoord");
         shaderProgram.uSamplerUniform = gl.getUniformLocation(shaderProgram,"uSampler");
         shaderProgram.uDataUniform = gl.getUniformLocation(shaderProgram,"uData");
-        //shaderProgram.uWidthUniform = gl.getUniformLocation(shaderProgram,"uWidth");
-        //shaderProgram.uHeightUniform = gl.getUniformLocation(shaderProgram,"uHeight");
+        shaderProgram.uWidthUniform = gl.getUniformLocation(shaderProgram,"uWidth");
+        shaderProgram.uHeightUniform = gl.getUniformLocation(shaderProgram,"uHeight");
     }
     function createBuffers(gl){
         var buffers = {};
