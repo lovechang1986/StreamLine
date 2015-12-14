@@ -15,7 +15,7 @@ define(["app/ShaderProgram","app/NoiseFrame","app/Vector","lib/glMatrix-0.9.5.mi
         //var texture = new ImageTexture(gl,"sources/crate.gif");
         var noiseFrame = new NoiseFrame(gl);
         var texture = noiseFrame.texture;
-        var vector = syntheseVector(width,height,0);
+        var vector = syntheseVector(width,height,1);
         var dataTexture = createDataTexture(gl,vector,width,height);
         function syntheseVector(width,height,mode){
             var vector = new Array(width*height*4);
